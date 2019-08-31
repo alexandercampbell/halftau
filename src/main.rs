@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 #[derive(Debug, PartialEq)]
 enum Token {
     ParenL,
@@ -12,7 +14,6 @@ use Token::*;
 fn tokenize(s: String) -> Vec<Token> {
     let mut tokens: Vec<Token> = vec![];
     let mut current_ident = String::new();
-    let mut line_no = 0;
 
     let ident_terminators = vec!['\n', ' ', '(', ')', '$', '\t'];
 
@@ -23,10 +24,6 @@ fn tokenize(s: String) -> Vec<Token> {
             if !current_ident.is_empty() {
                 tokens.push(Ident(current_ident));
                 current_ident = String::new();
-            }
-
-            if ch == '\n' {
-                line_no += 1;
             }
 
             let maybe_token = match ch {
@@ -48,11 +45,10 @@ fn tokenize(s: String) -> Vec<Token> {
         }
     }
 
-    println!("Lexed {:?} lines", line_no);
     tokens
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 enum Node {
     FunctionCall(Vec<Node>),
     Variable(String),
@@ -104,7 +100,6 @@ fn parse(tokens: &[Token]) -> Vec<Node> {
             break;
         }
         let token = token.unwrap();
-        println!("considering {:?}", token);
 
         match token {
             Ident(_) => {
@@ -121,7 +116,97 @@ fn parse(tokens: &[Token]) -> Vec<Node> {
     nodes
 }
 
-fn main() {}
+#[derive(Debug)]
+enum Function {
+    Defintion,
+    UserDefined { arguments: Vec<Node>, body: Node },
+}
+
+#[derive(Debug)]
+struct Runtime {
+    definitions: HashMap<String, Function>,
+}
+
+impl Runtime {
+    fn resolve_function(&self, node: &Node) -> Function {
+        match node {
+            Variable(text) => match &text[..] {
+                "fn" => Function::Defintion {},
+                _ => panic!("unrecognized function name"),
+            },
+            _ => panic!("function call attemped with non-name"),
+        }
+    }
+
+    fn execute_function(&mut self, func: &Function, arguments: &[Node]) {
+        println!(
+            "executing function call {:?} with args {:?}",
+            func, arguments
+        );
+
+        match func {
+            Function::Defintion => {
+                let name = match arguments.get(0) {
+                    Some(Variable(text)) => text,
+                    Some(_) => panic!("fn can only accept a variable name as its first parameter"),
+                    None => panic!("insufficient parameters to fn"),
+                };
+                println!("defining new function {:?}", name);
+
+                assert!(arguments.len() >= 2);
+                let function_arguments = &arguments[1..arguments.len() - 1];
+                let body = arguments[1..].get(arguments.len() - 2).unwrap();
+
+                self.definitions.insert(
+                    name.to_string(),
+                    Function::UserDefined {
+                        arguments: function_arguments.to_vec(),
+                        body: body.clone(),
+                    },
+                );
+            }
+
+            Function::UserDefined { .. } => {}
+        }
+    }
+}
+
+fn execute(program: Vec<Node>) {
+    let mut runtime = Runtime {
+        definitions: HashMap::new(),
+    };
+
+    for node in program {
+        match node {
+            FunctionCall(nodes) => {
+                assert!(nodes.len() > 0);
+                let func = runtime.resolve_function(&nodes[0]);
+                runtime.execute_function(&func, &nodes[1..]);
+            }
+            _ => panic!("only function calls are allowed at the top level"),
+        }
+    }
+
+    println!("created definitions: {:?}", runtime);
+}
+
+fn main() {
+    use std::env;
+    use std::fs::File;
+    use std::io::prelude::*;
+
+    let mut args = env::args();
+    args.next();
+    for arg in args {
+        let mut file = File::open(arg).unwrap();
+        let mut contents = String::new();
+        file.read_to_string(&mut contents).unwrap();
+
+        let tokens = tokenize(contents);
+        let ast = parse(&tokens[..]);
+        execute(ast);
+    }
+}
 
 #[test]
 fn test_inc_program() {
@@ -156,7 +241,6 @@ fn test_inc_program() {
     );
 
     let ast = parse(tokens.as_slice());
-    println!("AST {:?}", ast);
     assert!(
         ast == vec![FunctionCall(vec![
             Variable("fn".to_string()),
