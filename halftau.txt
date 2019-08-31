@@ -39,3 +39,29 @@ fn inc x $ + x 1
 
 
 
+
+mk-monster name position x y =
+	{ name name
+	, x x
+	, y y
+	}
+
+my-monster = mk-monster "goblin" 32 32
+monsters = [my-monster]
+monsters_past_x10 = filter (\m $ > 10 m.x) monsters
+
+inc x = + x 1
+dec x = - x 1
+
+
+fn inc x $ + x 1
+fn dec x $ - x 1
+
+fn xs [1 2 3 4]
+fn double x $ * 2 x
+fn doubled values $ map double values
+fn doubled_xs $ doubled_values xs
+assert $ = doubled_xs [2 4 6 8]
+
+
+
