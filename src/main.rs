@@ -8,6 +8,7 @@ enum Token {
     Ident(String),
     Grouper,
     Newline,
+    Tab,
 }
 
 fn tokenize(s: String) -> Vec<Token> {
@@ -17,7 +18,7 @@ fn tokenize(s: String) -> Vec<Token> {
     let mut current_ident = String::new();
     let mut line_no = 0;
 
-    let ident_terminators = vec!['\n', ' ', '(', ')', '$'];
+    let ident_terminators = vec!['\n', ' ', '(', ')', '$', '\t'];
 
     for ch in s.chars() {
         if ident_terminators.contains(&ch) {
@@ -28,19 +29,21 @@ fn tokenize(s: String) -> Vec<Token> {
                 current_ident = String::new();
             }
 
-            match ch {
-                '\n' => {
-                    tokens.push(Newline);
-                    line_no += 1;
-                }
-                '$' => {
-                    tokens.push(Grouper);
-                }
-                '(' => {
-                    tokens.push(ParenL);
-                }
-                ')' => {
-                    tokens.push(ParenR);
+            if ch == '\n' {
+                line_no += 1;
+            }
+
+            let maybe_token = match ch {
+                '\n' => Some(Newline),
+                '\t' => Some(Tab),
+                '$' => Some(Grouper),
+                '(' => Some(ParenL),
+                ')' => Some(ParenR),
+                _ => None,
+            };
+            match maybe_token {
+                Some(t) => {
+                    tokens.push(t);
                 }
                 _ => (),
             }
@@ -52,13 +55,15 @@ fn tokenize(s: String) -> Vec<Token> {
     tokens
 }
 
+// fn parse(tokens: Vec<Token>) {}
+
 fn main() {
     let tokens = tokenize(TEST_PROGRAM.to_string());
     println!("{:?}", tokens);
 }
 
 #[test]
-fn test_inc_tokens() {
+fn test_inc_program() {
     use Token::*;
 
     let tokens = tokenize(
