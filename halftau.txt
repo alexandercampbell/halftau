@@ -1,0 +1,41 @@
+
+x : Int -> Int
+x k = k + 1
+
+fn x k
+
+fn fold f l s $
+
+
+fn reverse xs $
+	concat (reverse $ tail xs) $ head xs
+
+
+
+:: (Y -> Z) -> (X -> Y) -> (X -> Z)
+comp f g $
+	\x -> f $ g x
+
+
+ns math
+
+fn map [f xs] $
+
+Num -> Int -> Num
+pow x n $
+	(assert- "Negative exponents not allowed" >= n 0)
+	fold * 1 $ repeat n x
+
+:: Int -> Int
+factorial n $
+	fold * 1 [1..n]
+
+assert $ = 5 $ math/fact 3
+
+fn dec x $ - x 1
+fn inc x $ + x 1
+
+(fn x [k] (k + 3))
+
+
+
