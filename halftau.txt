@@ -64,4 +64,24 @@ fn doubled_xs $ doubled_values xs
 assert $ = doubled_xs [2 4 6 8]
 
 
+inc x = + x 1
+dec x = - x 1
+double x = * 2 x
+double = * 2
+
+doubled = map double
+xs = [1 2 3 4]
+doubled_xs = doubled xs
+
+inc x = + x 1
+dec x = - x 1
+double x = * 2 x
+
+xs = [1 2 3 4]
+doubled_xs = double xs
+double = * 2
+triple = * 3
+compose fn1 fn2 x = fn2 $ fn1 x
+sextuple = compose double triangle
+
 
