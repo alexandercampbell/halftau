@@ -85,3 +85,112 @@ compose fn1 fn2 x = fn2 $ fn1 x
 sextuple = compose double triangle
 
 
+(def x (y z) (+ y z))
+(assert (= ((x 1) 2) 3))
+
+(def x (list y z) (+ y z))
+
+name monster = monster.name
+
+def x [y z] (+ y z)
+
+def x [y z] $
+
+assert $ = 3 $ x 1 2
+
+
+---
+
+
+if condition then else =
+	condition ? then : else
+
+new-square x y
+	{ x, y }
+
+def new-square [x y]
+	{ x = x
+	, y = y
+	}
+
+def update-square [square]
+	square
+	|> update
+		{ x = + square.x 5
+		, y = + square.y 5
+		}
+
+def init [] $
+	{ squares =
+		[ new-square 12 12
+		, new-square 32 34
+		]
+	}
+
+
+
+---
+
+20190919
+
+enum Maybe a
+	= Just a
+	| Nothing
+
+enum Result a b
+	= Err a
+	| Ok b
+
+head : [a] -> Maybe a
+cons : a -> [a] -> [a]
+show : a -> String
+print : String -> IO
+map : (a -> b) -> [a] -> [b]
+filter (a -> Bool) -> [a] -> [a]
+foldl : (b -> a -> b) -> b -> [a] -> b
+foldr : (b -> a -> b) -> b -> [a] -> b
+
+
+// example program
+
+struct Model =
+	{ x : Int
+	}
+
+update : Model -> Model
+update model =
+	{ model.x = + model.x 1 }
+
+step : Model -> [IO]
+step model =
+	let
+		model' = update model
+		action = print $ concat ["hello, x is now ", show model.x, "\n"]
+	in
+		cons action $ step model'
+
+main = step $ update $ Model { x = 1 }
+
+
+
+---
+
+the builtin runtime will iterate the output of main ([IO]) and execute each one
+IO will be an opaque value
+It will represent an instruction to the runtime to perform some action
+now, how to handle input
+
+
+
+
+struct Model =
+	{ x : Int
+	}
+
+update : Model -> Model
+update model =
+	{ model.x = + model.x 1 }
+
+
+typeclasses will probably be too challenging.
+
