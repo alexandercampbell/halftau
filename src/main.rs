@@ -26,20 +26,14 @@ fn tokenize(s: String) -> Vec<Token> {
                 current_ident = String::new();
             }
 
-            let maybe_token = match ch {
-                '\n' => Some(Newline),
-                '\t' => Some(Tab),
-                '$' => Some(Grouper),
-                '(' => Some(ParenL),
-                ')' => Some(ParenR),
-                _ => None,
-            };
-            match maybe_token {
-                Some(t) => {
-                    tokens.push(t);
-                }
+            match ch {
+                '\n' => tokens.push(Newline),
+                '\t' => tokens.push(Tab),
+                '$' => tokens.push(Grouper),
+                '(' => tokens.push(ParenL),
+                ')' => tokens.push(ParenR),
                 _ => (),
-            }
+            };
         } else {
             current_ident.push(ch);
         }
