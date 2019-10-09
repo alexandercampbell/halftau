@@ -194,3 +194,50 @@ update model =
 
 typeclasses will probably be too challenging.
 
+
+---
+
+car, cdr, cons, quote, cond, atom, eq
+
+
+head, tail, cons, empty, ', if, eq, lt, gt, ()
+
+type Maybe a
+	= Just a
+	| Nothing
+
+head     : [a] -> a
+tail     : [a] -> [a]
+empty 	 : [a] -> Bool
+cons	 : a -> [a] -> [a]
+add	 : Num -> Num -> Num
+subtract : Num -> Num -> Num
+mult	 : Num -> Num -> Num
+div	 : Num -> Num -> Num
+mod	 : Num -> Num -> Num
+
+map : (a -> b) -> [a] -> [b]
+map fn ls =
+	if (= [] ls)
+	[]
+	(cons (fn $ head ls) $ map fn $ tail ls)
+
+filter : (a -> Bool) -> [a] -> [a]
+filter is-good ls =
+	if (= [] ls) [] $
+		if (is-good $ head ls)
+			((cons $ head ls) $ filter is-good $ tail ls)
+			$ filter is-good $ tail ls
+
+times2 :: [Num] -> [Num]
+times2 = map $ mult 2
+
+times4 :: [Num] -> [Num]
+times4 = map $ mult 4
+
+plus1 :: [Num] -> [Num]
+plus1 = map $ plus 1
+
+
+
+
