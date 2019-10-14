@@ -239,5 +239,26 @@ plus1 :: [Num] -> [Num]
 plus1 = map $ plus 1
 
 
+--------------------------------------------------------------------------------
+20191013
 
+Consider the following :DDD
+
+vectors <x, y, z>
+lists   [x, y, z]
+
+triple x = * x 3
+double x = * x 2
+
+
+prelude
+
+using str
+using io
+
+file = io.read-all io.stdin
+lines = str.lines file
+numchars = lines | map str.len | sum
+
+main = io.print stdout "\{lines} lines, \{characters} characters"
 
