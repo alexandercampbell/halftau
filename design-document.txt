@@ -1,0 +1,33 @@
+
+; halftau design document
+
+
+; integers are all 64 bit
+; doubles are all 64 bit
+; all and only concrete types are capitalized
+; halftau looks like this
+
+(ns math)
+
+(sigdef is-even [int -> int]
+        [i] (->> i #(mod % 2) (= 0)))
+
+(sigdef doubled [list double -> list double]
+        [] (map (* 2)))
+
+(sigdef main [int])
+
+even : Int -> Bool
+even x $ == 0 $ % x 2
+
+double :: List Int -> List Int
+double = map $ * 2
+
+main :: IO -> IO(Int)
+main io = do
+	[ discard io << println "hello"
+	, return 0
+	]
+
+
+
