@@ -1,4 +1,5 @@
 
+; vim: ft=clojure
 ; halftau design document
 
 
@@ -7,13 +8,14 @@
 ; all and only concrete types are capitalized
 ; halftau looks like this
 
+; differences from clojure
+; partial application by default
+; no variable args
+
 (ns math)
 
-(sigdef is-even [int -> int]
-        [i] (->> i #(mod % 2) (= 0)))
-
-(sigdef doubled [list double -> list double]
-        [] (map (* 2)))
+(sigdef is-even [int -> int]                 [i] (->> i #(mod % 2) (= 0)))
+(sigdef doubled [list double -> list double] [] (map (* 2)))
 
 (sigdef main [int])
 
@@ -28,6 +30,4 @@ main io = do
 	[ discard io << println "hello"
 	, return 0
 	]
-
-
 
