@@ -33,14 +33,7 @@ pub enum Type {
     Double,
     String_,
     Function(Vec<Type>),
-    List(Box<Type>),
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct List {
-    pub type_: Type,
-    pub head: Box<Value>,
-    pub tail: Option<Box<List>>,
+    Vector(Box<Type>),
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -48,7 +41,10 @@ pub enum Value {
     Int(i64),
     Double(f64),
     String_(String),
-    List(List),
+    Vector {
+        type_: Type,
+        elts: Vec<Value>,
+    },
     Function {
         lexical_bindings: Vec<String>,
         type_sig: Vec<Type>,
@@ -65,7 +61,7 @@ pub fn typeof_(v: &Value) -> Type {
         Value::Int(_) => Type::Int,
         Value::Double(_) => Type::Double,
         Value::String_(_) => Type::String_,
-        Value::List(l) => l.type_.clone(),
+        Value::Vector { type_, .. } => Type::Vector(Box::new(type_.clone())),
         Value::Function { type_sig, .. } => Type::Function(type_sig.clone()),
         Value::BuiltinFunction { type_sig, .. } => Type::Function(type_sig.clone()),
     }

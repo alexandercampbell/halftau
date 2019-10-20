@@ -1,4 +1,6 @@
-
 ; comment
-(defn inc [x] (add x 1))
+(print-int 1)
+(print-int 123)
+(print-int 141)
+(print-int 14455)
 
