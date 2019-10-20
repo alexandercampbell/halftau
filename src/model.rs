@@ -2,6 +2,8 @@
 pub enum TokenType {
     ParenL,
     ParenR,
+    BracketL,
+    BracketR,
     Ident,
     IntLiteral,
     DoubleLiteral,
@@ -18,6 +20,7 @@ pub struct Token {
 #[derive(Debug, PartialEq, Clone)]
 pub enum Node {
     FunctionCall(Vec<Node>),
+    Vector(Vec<Node>),
     Reference(String),
     Int(i64),
     Double(f64),

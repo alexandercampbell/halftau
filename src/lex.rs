@@ -35,6 +35,17 @@ pub fn lex(s: String) -> Result<Vec<Token>, String> {
                 line_number,
             }),
 
+            '[' => tokens.push(Token {
+                _type: BracketL,
+                text: ch.to_string(),
+                line_number,
+            }),
+            ']' => tokens.push(Token {
+                _type: BracketR,
+                text: ch.to_string(),
+                line_number,
+            }),
+
             'a'..='z' | 'A'..='Z' => {
                 let mut text = ch.to_string();
                 while let Some(next) = chars.peek() {
