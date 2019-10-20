@@ -1,4 +1,5 @@
-use crate::model::*;
+use crate::model::Token;
+use crate::model::TokenType::*;
 
 pub fn lex(s: String) -> Result<Vec<Token>, String> {
     let mut tokens: Vec<Token> = vec![];

@@ -1,6 +1,7 @@
 mod lex;
 mod model;
 mod parse;
+mod runtime;
 
 fn main() {
     use std::env;

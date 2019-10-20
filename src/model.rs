@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 #[derive(Debug, PartialEq)]
 pub enum TokenType {
     ParenL,
@@ -8,7 +10,6 @@ pub enum TokenType {
     IntLiteral,
     DoubleLiteral,
 }
-pub use TokenType::*;
 
 #[derive(Debug, PartialEq)]
 pub struct Token {
@@ -25,4 +26,58 @@ pub enum Node {
     Int(i64),
     Double(f64),
 }
-pub use Node::*;
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum Type {
+    Int,
+    Double,
+    String_,
+    Function(Vec<Type>),
+    List(Box<Type>),
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct List {
+    pub type_: Type,
+    pub head: Box<Value>,
+    pub tail: Option<Box<List>>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum Value {
+    Int(i64),
+    Double(f64),
+    String_(String),
+    List(List),
+    Function {
+        lexical_bindings: Vec<String>,
+        type_sig: Vec<Type>,
+        body: Vec<Value>,
+    },
+    BuiltinFunction {
+        type_sig: Vec<Type>,
+        exec: fn(Vec<Value>) -> Value,
+    },
+}
+
+pub fn typeof_(v: &Value) -> Type {
+    match v {
+        Value::Int(_) => Type::Int,
+        Value::Double(_) => Type::Double,
+        Value::String_(_) => Type::String_,
+        Value::List(l) => l.type_.clone(),
+        Value::Function { type_sig, .. } => Type::Function(type_sig.clone()),
+        Value::BuiltinFunction { type_sig, .. } => Type::Function(type_sig.clone()),
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct Scope {
+    pub parent: Option<Box<Scope>>,
+    pub bindings: HashMap<String, Value>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct Runtime {
+    pub root_scope: Scope,
+}
