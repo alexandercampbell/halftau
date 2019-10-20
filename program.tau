@@ -1,3 +1,3 @@
 
-(fn inc x)
+(fn inc x 12 41.4)
 
