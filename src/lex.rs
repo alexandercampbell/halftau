@@ -16,6 +16,14 @@ pub fn lex(s: String) -> Result<Vec<Token>, String> {
         match ch {
             '\t' | ' ' => (),
             '\n' => line_number += 1,
+            ';' => {
+                while let Some(next) = chars.next() {
+                    if next == '\n' {
+                        line_number += 1;
+                        break;
+                    }
+                }
+            }
             '(' => tokens.push(Token {
                 _type: ParenL,
                 text: ch.to_string(),
