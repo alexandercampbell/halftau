@@ -87,15 +87,9 @@ pub fn parse(tokens: &[Token]) -> Result<Vec<Node>, String> {
     let mut nodes: Vec<Node> = vec![];
     let mut index = 0;
     while index < tokens.len() {
-        match parse_function_call(tokens, index) {
-            Ok((node, new_index)) => {
-                nodes.push(node);
-                index = new_index;
-            }
-            Err(s) => {
-                return Err(s);
-            }
-        }
+        let (node, new_index) = parse_function_call(tokens, index)?;
+        nodes.push(node);
+        index = new_index;
     }
     Ok(nodes)
 }
