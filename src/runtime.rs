@@ -11,36 +11,55 @@ fn lookup(scope: &Scope, name: String) -> Result<Value, String> {
     Err(format!("variable {:?} undefined", name))
 }
 
+fn exec(value: Value, scope: &Scope) {
+    if let Value::List(head, tail) = value {
+        println!("execing {:?} on {:?}", head, tail);
+    }
+
+    /*
+    match func {
+        Value::Function {
+            lexical_bindings,
+            body,
+        } => return Err(format!("call to user functions unimplemented")),
+
+        Value::BuiltinFunction { arity, exec } => {
+            if arity != args.len() {
+                return Err(format!("attempt to call {:?} with the wrong arity", func));
+            }
+            return Ok(exec(args));
+        }
+
+        _ => Err(format!(
+            "attempting to call {:?}, but it's not a function",
+            func
+        )),
+    }
+    */
+}
+
 fn eval(node: &Node, scope: &Scope) -> Result<Value, String> {
     match node {
         Node::Int(i) => Ok(Value::Int(i.clone())),
         Node::Double(d) => Ok(Value::Double(d.clone())),
         Node::Reference(name) => lookup(scope, name.clone()),
-        Node::FunctionCall(elts) => {
-            let func = eval(&elts[0], scope)?;
-            let mut args = vec![];
-            for e in elts[1..].iter() {
-                args.push(eval(e, scope)?);
+        Node::List(elts) => {
+            if elts.len() == 0 {
+                return Ok(Value::Unit);
             }
 
-            match func {
-                Value::Function {
-                    lexical_bindings,
-                    body,
-                } => return Err(format!("call to user functions unimplemented")),
-
-                Value::BuiltinFunction { arity, exec } => {
-                    if arity != args.len() {
-                        return Err(format!("attempt to call {:?} with the wrong arity", func));
-                    }
-                    return Ok(exec(args));
-                }
-
-                _ => Err(format!(
-                    "attempting to call {:?}, but it's not a function",
-                    func
-                )),
+            let mut evaled = vec![];
+            for e in elts.iter() {
+                evaled.push(eval(e, scope)?);
             }
+            evaled.reverse();
+
+            let mut head = Value::List(Box::new(evaled[0].clone()), Box::new(Value::Unit));
+            for e in evaled[1..].iter() {
+                head = Value::List(Box::new(e.clone()), Box::new(head));
+            }
+
+            Ok(head)
         }
         _ => Err(format!("don't know how to process {:?}", node)),
     }
@@ -55,7 +74,6 @@ pub fn execute(ast: Vec<Node>) {
     root_scope.bindings.insert(
         "print".to_string(),
         Value::BuiltinFunction {
-            arity: 1,
             exec: |args: Vec<Value>| -> Value {
                 println!("{:?}", args[0]);
                 args[0].clone()
@@ -64,6 +82,8 @@ pub fn execute(ast: Vec<Node>) {
     );
 
     for node in ast {
-        eval(&node, &root_scope).unwrap();
+        let value = eval(&node, &root_scope).unwrap();
+        exec(value, &root_scope);
+        println!("{:?}", eval(&node, &root_scope).unwrap());
     }
 }

@@ -4,7 +4,7 @@ use crate::model::*;
 
 fn parse_expr(tokens: &[Token], index: usize) -> Result<(Node, usize), String> {
     match tokens.get(index) {
-        Some(Token { _type: ParenL, .. }) => parse_function_call(tokens, index),
+        Some(Token { _type: ParenL, .. }) => parse_list(tokens, index),
         Some(Token {
             _type: BracketL, ..
         }) => parse_vector(tokens, index),
@@ -75,7 +75,7 @@ fn parse_vector(tokens: &[Token], index: usize) -> Result<(Node, usize), String>
     }
 }
 
-fn parse_function_call(tokens: &[Token], index: usize) -> Result<(Node, usize), String> {
+fn parse_list(tokens: &[Token], index: usize) -> Result<(Node, usize), String> {
     let mut elts = vec![];
     assert_eq!(ParenL, tokens[index]._type);
     let start_line_number = tokens[index].line_number;
@@ -85,7 +85,7 @@ fn parse_function_call(tokens: &[Token], index: usize) -> Result<(Node, usize), 
     loop {
         if let Some(token) = tokens.get(index) {
             if token._type == ParenR {
-                return Ok((FunctionCall(elts), index + 1));
+                return Ok((List(elts), index + 1));
             }
 
             let (elt, new_index) = parse_expr(tokens, index)?;

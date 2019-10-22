@@ -20,7 +20,7 @@ pub struct Token {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Node {
-    FunctionCall(Vec<Node>),
+    List(Vec<Node>),
     Vector(Vec<Node>),
     Reference(String),
     Int(i64),
@@ -32,8 +32,10 @@ pub enum Type {
     Int,
     Double,
     String_,
-    Function(usize),
-    Vector(Box<Type>),
+    Function,
+    Keyword,
+    List,
+    Unit,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -41,16 +43,14 @@ pub enum Value {
     Int(i64),
     Double(f64),
     String_(String),
-    Vector {
-        type_: Type,
-        elts: Vec<Value>,
-    },
+    Keyword(String),
+    List(Box<Value>, Box<Value>),
+    Unit,
     Function {
         lexical_bindings: Vec<String>,
         body: Box<Value>,
     },
     BuiltinFunction {
-        arity: usize,
         exec: fn(Vec<Value>) -> Value,
     },
 }
@@ -60,11 +60,11 @@ pub fn typeof_(v: &Value) -> Type {
         Value::Int(_) => Type::Int,
         Value::Double(_) => Type::Double,
         Value::String_(_) => Type::String_,
-        Value::Vector { type_, .. } => Type::Vector(Box::new(type_.clone())),
-        Value::Function {
-            lexical_bindings, ..
-        } => Type::Function(lexical_bindings.len()),
-        Value::BuiltinFunction { arity, .. } => Type::Function(arity.clone()),
+        Value::List { .. } => Type::List,
+        Value::Keyword { .. } => Type::Keyword,
+        Value::Function { .. } => Type::Function,
+        Value::BuiltinFunction { .. } => Type::Function,
+        Value::Unit => Type::Unit,
     }
 }
 
