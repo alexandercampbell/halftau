@@ -26,11 +26,13 @@ fn eval(node: &Node, scope: &Scope) -> Result<Value, String> {
             match func {
                 Value::Function {
                     lexical_bindings,
-                    type_sig,
                     body,
                 } => return Err(format!("call to user functions unimplemented")),
 
-                Value::BuiltinFunction { type_sig, exec } => {
+                Value::BuiltinFunction { arity, exec } => {
+                    if arity != args.len() {
+                        return Err(format!("attempt to call {:?} with the wrong arity", func));
+                    }
                     return Ok(exec(args));
                 }
 
@@ -51,9 +53,9 @@ pub fn execute(ast: Vec<Node>) {
     };
 
     root_scope.bindings.insert(
-        "print-int".to_string(),
+        "print".to_string(),
         Value::BuiltinFunction {
-            type_sig: vec![Type::Int],
+            arity: 1,
             exec: |args: Vec<Value>| -> Value {
                 println!("{:?}", args[0]);
                 args[0].clone()

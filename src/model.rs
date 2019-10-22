@@ -32,7 +32,7 @@ pub enum Type {
     Int,
     Double,
     String_,
-    Function(Vec<Type>),
+    Function(usize),
     Vector(Box<Type>),
 }
 
@@ -47,11 +47,10 @@ pub enum Value {
     },
     Function {
         lexical_bindings: Vec<String>,
-        type_sig: Vec<Type>,
-        body: Vec<Value>,
+        body: Box<Value>,
     },
     BuiltinFunction {
-        type_sig: Vec<Type>,
+        arity: usize,
         exec: fn(Vec<Value>) -> Value,
     },
 }
@@ -62,8 +61,10 @@ pub fn typeof_(v: &Value) -> Type {
         Value::Double(_) => Type::Double,
         Value::String_(_) => Type::String_,
         Value::Vector { type_, .. } => Type::Vector(Box::new(type_.clone())),
-        Value::Function { type_sig, .. } => Type::Function(type_sig.clone()),
-        Value::BuiltinFunction { type_sig, .. } => Type::Function(type_sig.clone()),
+        Value::Function {
+            lexical_bindings, ..
+        } => Type::Function(lexical_bindings.len()),
+        Value::BuiltinFunction { arity, .. } => Type::Function(arity.clone()),
     }
 }
 

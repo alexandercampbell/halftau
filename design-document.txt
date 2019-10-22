@@ -5,12 +5,10 @@
 
 ; integers are all 64 bit
 ; doubles are all 64 bit
-; all and only concrete types are capitalized
 ; halftau looks like this
-
-; differences from clojure
-; partial application by default
-; no variable args
+;
+; the idea: fast modern lisp like clojure, but not interpreted onto the JVM
+; backed by Rust
 
 (ns math)
 
