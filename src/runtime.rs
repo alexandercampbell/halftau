@@ -1,7 +1,7 @@
 use crate::model::*;
 use std::collections::HashMap;
 
-fn lookup(scope: &Scope, name: String) -> Result<Value, String> {
+fn lookup(scope: &Scope, name: String) -> Result<Elt, String> {
     if let Some(value) = scope.bindings.get(&name) {
         return Ok(value.clone());
     }
@@ -11,19 +11,19 @@ fn lookup(scope: &Scope, name: String) -> Result<Value, String> {
     Err(format!("variable {:?} undefined", name))
 }
 
-fn exec(value: Value, scope: &Scope) {
-    if let Value::List(head, tail) = value {
-        println!("execing {:?} on {:?}", head, tail);
+fn exec(value: Elt, scope: &Scope) {
+    if let Elt::List(elts) = value {
+        println!("execing {:?} on {:?}", elts[0], &elts[1..]);
     }
 
     /*
     match func {
-        Value::Function {
+        Elt::Function {
             lexical_bindings,
             body,
         } => return Err(format!("call to user functions unimplemented")),
 
-        Value::BuiltinFunction { arity, exec } => {
+        Elt::BuiltinFunction { arity, exec } => {
             if arity != args.len() {
                 return Err(format!("attempt to call {:?} with the wrong arity", func));
             }
@@ -38,34 +38,23 @@ fn exec(value: Value, scope: &Scope) {
     */
 }
 
-fn eval(node: &Node, scope: &Scope) -> Result<Value, String> {
+fn eval(node: &Elt, scope: &Scope) -> Result<Elt, String> {
     match node {
-        Node::Int(i) => Ok(Value::Int(i.clone())),
-        Node::Double(d) => Ok(Value::Double(d.clone())),
-        Node::Reference(name) => lookup(scope, name.clone()),
-        Node::List(elts) => {
-            if elts.len() == 0 {
-                return Ok(Value::Unit);
-            }
-
+        Elt::Int(i) => Ok(Elt::Int(i.clone())),
+        Elt::Double(d) => Ok(Elt::Double(d.clone())),
+        Elt::Reference(name) => lookup(scope, name.clone()),
+        Elt::List(elts) => {
             let mut evaled = vec![];
             for e in elts.iter() {
                 evaled.push(eval(e, scope)?);
             }
-            evaled.reverse();
-
-            let mut head = Value::List(Box::new(evaled[0].clone()), Box::new(Value::Unit));
-            for e in evaled[1..].iter() {
-                head = Value::List(Box::new(e.clone()), Box::new(head));
-            }
-
-            Ok(head)
+            Ok(Elt::List(evaled))
         }
         _ => Err(format!("don't know how to process {:?}", node)),
     }
 }
 
-pub fn execute(ast: Vec<Node>) {
+pub fn execute(ast: Vec<Elt>) {
     let mut root_scope = Scope {
         parent: None,
         bindings: HashMap::new(),
@@ -73,12 +62,7 @@ pub fn execute(ast: Vec<Node>) {
 
     root_scope.bindings.insert(
         "print".to_string(),
-        Value::BuiltinFunction {
-            exec: |args: Vec<Value>| -> Value {
-                println!("{:?}", args[0]);
-                args[0].clone()
-            },
-        },
+        Elt::BuiltinFunction("print".to_string()),
     );
 
     for node in ast {

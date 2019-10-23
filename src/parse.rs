@@ -1,8 +1,8 @@
-use crate::model::Node::*;
+use crate::model::Elt::*;
 use crate::model::TokenType::*;
 use crate::model::*;
 
-fn parse_expr(tokens: &[Token], index: usize) -> Result<(Node, usize), String> {
+fn parse_expr(tokens: &[Token], index: usize) -> Result<(Elt, usize), String> {
     match tokens.get(index) {
         Some(Token { _type: ParenL, .. }) => parse_list(tokens, index),
         Some(Token {
@@ -50,7 +50,7 @@ fn parse_expr(tokens: &[Token], index: usize) -> Result<(Node, usize), String> {
     }
 }
 
-fn parse_vector(tokens: &[Token], index: usize) -> Result<(Node, usize), String> {
+fn parse_vector(tokens: &[Token], index: usize) -> Result<(Elt, usize), String> {
     let mut elts = vec![];
     assert_eq!(BracketL, tokens[index]._type);
     let start_line_number = tokens[index].line_number;
@@ -75,7 +75,7 @@ fn parse_vector(tokens: &[Token], index: usize) -> Result<(Node, usize), String>
     }
 }
 
-fn parse_list(tokens: &[Token], index: usize) -> Result<(Node, usize), String> {
+fn parse_list(tokens: &[Token], index: usize) -> Result<(Elt, usize), String> {
     let mut elts = vec![];
     assert_eq!(ParenL, tokens[index]._type);
     let start_line_number = tokens[index].line_number;
@@ -100,8 +100,8 @@ fn parse_list(tokens: &[Token], index: usize) -> Result<(Node, usize), String> {
     }
 }
 
-pub fn parse(tokens: &[Token]) -> Result<Vec<Node>, String> {
-    let mut nodes: Vec<Node> = vec![];
+pub fn parse(tokens: &[Token]) -> Result<Vec<Elt>, String> {
+    let mut nodes: Vec<Elt> = vec![];
     let mut index = 0;
     while index < tokens.len() {
         let (node, new_index) = parse_expr(tokens, index)?;

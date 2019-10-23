@@ -19,12 +19,19 @@ pub struct Token {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum Node {
-    List(Vec<Node>),
-    Vector(Vec<Node>),
-    Reference(String),
+pub enum Elt {
     Int(i64),
     Double(f64),
+    String_(String),
+    Reference(String),
+    List(Vec<Elt>),
+    Vector(Vec<Elt>),
+    Function {
+        lexical_bindings: Vec<String>,
+        body: Box<Elt>,
+    },
+    BuiltinFunction(String),
+    Nil,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -32,46 +39,31 @@ pub enum Type {
     Int,
     Double,
     String_,
-    Function,
-    Keyword,
+    Reference,
     List,
-    Unit,
+    Vector,
+    Function,
+    Nil,
 }
 
-#[derive(Debug, PartialEq, Clone)]
-pub enum Value {
-    Int(i64),
-    Double(f64),
-    String_(String),
-    Keyword(String),
-    List(Box<Value>, Box<Value>),
-    Unit,
-    Function {
-        lexical_bindings: Vec<String>,
-        body: Box<Value>,
-    },
-    BuiltinFunction {
-        exec: fn(Vec<Value>) -> Value,
-    },
-}
-
-pub fn typeof_(v: &Value) -> Type {
+pub fn typeof_(v: &Elt) -> Type {
     match v {
-        Value::Int(_) => Type::Int,
-        Value::Double(_) => Type::Double,
-        Value::String_(_) => Type::String_,
-        Value::List { .. } => Type::List,
-        Value::Keyword { .. } => Type::Keyword,
-        Value::Function { .. } => Type::Function,
-        Value::BuiltinFunction { .. } => Type::Function,
-        Value::Unit => Type::Unit,
+        Elt::Int(_) => Type::Int,
+        Elt::Double(_) => Type::Double,
+        Elt::String_(_) => Type::String_,
+        Elt::Reference(_) => Type::Reference,
+        Elt::List(_) => Type::List,
+        Elt::Vector(_) => Type::Vector,
+        Elt::Function { .. } => Type::Function,
+        Elt::BuiltinFunction { .. } => Type::Function,
+        Elt::Nil => Type::Nil,
     }
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Scope {
     pub parent: Option<Box<Scope>>,
-    pub bindings: HashMap<String, Value>,
+    pub bindings: HashMap<String, Elt>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
