@@ -38,22 +38,6 @@ fn exec(value: Elt, scope: &Scope) {
     */
 }
 
-fn eval(node: &Elt, scope: &Scope) -> Result<Elt, String> {
-    match node {
-        Elt::Int(i) => Ok(Elt::Int(i.clone())),
-        Elt::Double(d) => Ok(Elt::Double(d.clone())),
-        Elt::Reference(name) => lookup(scope, name.clone()),
-        Elt::List(elts) => {
-            let mut evaled = vec![];
-            for e in elts.iter() {
-                evaled.push(eval(e, scope)?);
-            }
-            Ok(Elt::List(evaled))
-        }
-        _ => Err(format!("don't know how to process {:?}", node)),
-    }
-}
-
 pub fn execute(ast: Vec<Elt>) {
     let mut root_scope = Scope {
         parent: None,
@@ -66,8 +50,6 @@ pub fn execute(ast: Vec<Elt>) {
     );
 
     for node in ast {
-        let value = eval(&node, &root_scope).unwrap();
-        exec(value, &root_scope);
-        println!("{:?}", eval(&node, &root_scope).unwrap());
+        exec(node, &root_scope);
     }
 }

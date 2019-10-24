@@ -3,6 +3,9 @@
 
 ; (def x '(print 32))
 
+(print "hello part two\n")
+(print "hello \" part two")
+(print "hello")
 (print 1)
 (print 123)
 (print 141)

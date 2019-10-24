@@ -8,6 +8,7 @@ pub enum TokenType {
     BracketR,
     Ident,
     IntLiteral,
+    StringLiteral,
     DoubleLiteral,
 }
 

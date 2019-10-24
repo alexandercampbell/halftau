@@ -20,6 +20,11 @@ fn parse_expr(tokens: &[Token], index: usize) -> Result<(Elt, usize), String> {
             )),
         },
         Some(Token {
+            _type: StringLiteral,
+            text,
+            ..
+        }) => Ok((String_(text.clone()), index + 1)),
+        Some(Token {
             _type: DoubleLiteral,
             text,
             line_number,

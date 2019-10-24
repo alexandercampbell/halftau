@@ -64,6 +64,35 @@ pub fn lex(s: String) -> Result<Vec<Token>, String> {
                 });
             }
 
+            '\"' => {
+                let mut text = String::new();
+                while let Some(next) = chars.peek() {
+                    if *next == '\"' {
+                        chars.next();
+                        break;
+                    } else if *next == '\\' {
+                        chars.next();
+                        if let Some(escaped) = chars.peek() {
+                            text.push(match escaped {
+                                '\"' => '\"',
+                                'n' => '\n',
+                                't' => '\t',
+                                _ => return Err(format!("unknown escape sequence \\{}", escaped)),
+                            });
+                            chars.next();
+                        }
+                        continue;
+                    }
+                    text.push(next.clone());
+                    chars.next();
+                }
+                tokens.push(Token {
+                    _type: StringLiteral,
+                    text,
+                    line_number,
+                });
+            }
+
             '0'..='9' => {
                 let mut text = ch.to_string();
                 let mut is_double = false;
