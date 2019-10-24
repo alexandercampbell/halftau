@@ -1,11 +1,9 @@
 use crate::model::*;
 use std::collections::HashMap;
 
-fn lookup(runtime: &Runtime, name: &String) -> Result<Elt, String> {
-    for scope in runtime.scopes.iter() {
-        if let Some(value) = scope.bindings.get(name) {
-            return Ok(value.clone());
-        }
+fn lookup(scope: &Scope, name: &String) -> Result<Elt, String> {
+    if let Some(value) = scope.bindings.get(name) {
+        return Ok(value.clone());
     }
     Err(format!("variable {:?} undefined", name))
 }
@@ -45,12 +43,12 @@ fn format_elt(elt: &Elt) -> String {
     }
 }
 
-fn eval_function(elts: &[Elt], runtime: &mut Runtime) -> Result<Elt, String> {
+fn eval_function(elts: &[Elt], runtime: &mut Runtime, scope: &Scope) -> Result<Elt, String> {
     if elts.len() == 0 {
         return Err("attempt to evaluate empty list as function".to_string());
     }
 
-    let function = eval(&elts[0], runtime)?;
+    let function = eval(&elts[0], runtime, scope)?;
 
     match function {
         Elt::Function {
@@ -59,7 +57,7 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime) -> Result<Elt, String> {
         } => {
             let mut args = vec![];
             for elt in &elts[1..] {
-                args.push(eval(&elt, runtime)?);
+                args.push(eval(&elt, runtime, scope)?);
             }
 
             if lexical_bindings.len() != args.len() {
@@ -71,17 +69,16 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime) -> Result<Elt, String> {
                 ));
             }
 
-            let mut bindings = HashMap::new();
+            let mut new_scope = scope.clone();
             let mut i = 0;
             while i < lexical_bindings.len() {
-                bindings.insert(lexical_bindings[i].clone(), args[i].clone());
+                new_scope
+                    .bindings
+                    .insert(lexical_bindings[i].clone(), args[i].clone());
                 i += 1;
             }
 
-            let new_scope = Scope { bindings: bindings };
-            let mut runtime = runtime.clone();
-            runtime.scopes.push(new_scope);
-            return eval(body, &mut runtime);
+            return eval(body, runtime, &new_scope);
         }
 
         Elt::BuiltinFunction(btype) => {
@@ -94,8 +91,8 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime) -> Result<Elt, String> {
                     }
 
                     if let Elt::Symbol(sym) = &args[0] {
-                        let val = &eval(&args[1], runtime)?;
-                        runtime.scopes[0].bindings.insert(sym.clone(), val.clone());
+                        let val = &eval(&args[1], runtime, scope)?;
+                        runtime.root_scope.bindings.insert(sym.clone(), val.clone());
                         Ok(val.clone())
                     } else {
                         Err(format!("first parameter to def must be a symbol"))
@@ -103,7 +100,7 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime) -> Result<Elt, String> {
                 }
                 Builtin::Print => {
                     for arg in args {
-                        let elt = eval(&arg, runtime)?;
+                        let elt = eval(&arg, runtime, scope)?;
                         print!("{}", format_elt(&elt));
                         print!(" ");
                     }
@@ -111,7 +108,7 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime) -> Result<Elt, String> {
                 }
                 Builtin::Println => {
                     for arg in args {
-                        let elt = eval(&arg, runtime)?;
+                        let elt = eval(&arg, runtime, scope)?;
                         print!("{}", format_elt(&elt));
                         print!(" ");
                     }
@@ -160,10 +157,10 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime) -> Result<Elt, String> {
     }
 }
 
-fn eval(value: &Elt, runtime: &mut Runtime) -> Result<Elt, String> {
+fn eval(value: &Elt, runtime: &mut Runtime, scope: &Scope) -> Result<Elt, String> {
     match value {
-        Elt::List(elts) => eval_function(elts, runtime),
-        Elt::Symbol(name) => eval(&lookup(runtime, &name)?, runtime),
+        Elt::List(elts) => eval_function(elts, runtime, scope),
+        Elt::Symbol(name) => eval(&lookup(scope, &name)?, runtime, scope),
         _ => Ok(value.clone()),
     }
 }
@@ -190,12 +187,11 @@ pub fn execute(ast: Vec<Elt>) {
         .bindings
         .insert("fn".to_string(), Elt::BuiltinFunction(Builtin::Fn_));
 
-    let mut runtime = Runtime {
-        scopes: vec![root_scope],
-    };
+    let mut runtime = Runtime { root_scope };
 
     for node in ast {
-        if let Err(e) = eval(&node, &mut runtime) {
+        let scope = runtime.root_scope.clone();
+        if let Err(e) = eval(&node, &mut runtime, &scope) {
             println!("error during evaluation: {}", e);
             break;
         }

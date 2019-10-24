@@ -78,5 +78,5 @@ pub struct Scope {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Runtime {
-    pub scopes: Vec<Scope>,
+    pub root_scope: Scope,
 }
