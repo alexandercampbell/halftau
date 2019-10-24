@@ -21,6 +21,13 @@ pub struct Token {
 }
 
 #[derive(Debug, PartialEq, Clone)]
+pub enum Builtin {
+    Print,
+    Def,
+    Quote,
+}
+
+#[derive(Debug, PartialEq, Clone)]
 pub enum Elt {
     Int(i64),
     Double(f64),
@@ -32,7 +39,7 @@ pub enum Elt {
         lexical_bindings: Vec<String>,
         body: Box<Elt>,
     },
-    BuiltinFunction(String),
+    BuiltinFunction(Builtin),
     Nil,
 }
 

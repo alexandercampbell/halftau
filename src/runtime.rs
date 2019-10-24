@@ -49,11 +49,11 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime) -> Result<Elt, String> {
             return eval(body, &mut runtime);
         }
 
-        Elt::BuiltinFunction(name) => {
+        Elt::BuiltinFunction(btype) => {
             let args = &elts[1..];
 
-            match name.as_ref() {
-                "def" => {
+            match btype {
+                Builtin::Def => {
                     if args.len() != 2 {
                         return Err(format!("expected 2 arguments to def; {} found", args.len()));
                     }
@@ -66,7 +66,7 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime) -> Result<Elt, String> {
                         Err(format!("first parameter to def must be a symbol"))
                     }
                 }
-                "print" | "println" => {
+                Builtin::Print => {
                     let mut evaluated = vec![];
                     for arg in args {
                         evaluated.push(eval(arg, runtime)?);
@@ -76,7 +76,7 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime) -> Result<Elt, String> {
                     }
                     Ok(Elt::Nil)
                 }
-                "quote" => {
+                Builtin::Quote => {
                     if args.len() != 1 {
                         return Err(format!(
                             "quote accepts only one parameter; {} found",
@@ -85,7 +85,6 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime) -> Result<Elt, String> {
                     }
                     Ok(args[0].clone())
                 }
-                _ => return Err(format!("undefined builtin function {}", name)),
             }
         }
 
@@ -108,17 +107,13 @@ pub fn execute(ast: Vec<Elt>) {
         bindings: HashMap::new(),
     };
 
-    root_scope.bindings.insert(
-        "print".to_string(),
-        Elt::BuiltinFunction("print".to_string()),
-    );
-    root_scope.bindings.insert(
-        "println".to_string(),
-        Elt::BuiltinFunction("println".to_string()),
-    );
     root_scope
         .bindings
-        .insert("def".to_string(), Elt::BuiltinFunction("def".to_string()));
+        .insert("print".to_string(), Elt::BuiltinFunction(Builtin::Print));
+    root_scope
+        .bindings
+        .insert("def".to_string(), Elt::BuiltinFunction(Builtin::Def));
+
     let mut runtime = Runtime {
         scopes: vec![root_scope],
     };
