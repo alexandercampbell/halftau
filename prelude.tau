@@ -1,0 +1,30 @@
+; vi: ft=clojure
+; comment
+
+(def x '(print 32))
+(def x (quote (print 32)))
+
+(def x 10)
+(print "x" x)
+(print "'x" 'x)
+
+(defmacro fn [arguments body]
+  (--construct-lambda arguments body))
+
+(def defn
+  (fn [name args body]
+    (def name (fn args body))))
+
+(defn sum [x y z] (+ x y z))
+
+(def x "hello")
+
+(print "hello part two\n")
+(print "hello \" part two")
+(print "hello")
+(print 1)
+(print 123)
+(print 141)
+(print 14455)
+(print 14455.54)
+

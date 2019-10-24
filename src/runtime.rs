@@ -11,7 +11,7 @@ fn lookup(scope: &Scope, name: String) -> Result<Elt, String> {
     Err(format!("variable {:?} undefined", name))
 }
 
-fn exec(value: Elt, scope: &Scope) {
+fn eval(value: Elt, scope: &Scope) {
     if let Elt::List(elts) = value {
         println!("execing {:?} on {:?}", elts[0], &elts[1..]);
     }
@@ -50,6 +50,6 @@ pub fn execute(ast: Vec<Elt>) {
     );
 
     for node in ast {
-        exec(node, &root_scope);
+        eval(node, &root_scope);
     }
 }

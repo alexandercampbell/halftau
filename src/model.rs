@@ -10,6 +10,7 @@ pub enum TokenType {
     IntLiteral,
     StringLiteral,
     DoubleLiteral,
+    Quote,
 }
 
 #[derive(Debug, PartialEq)]

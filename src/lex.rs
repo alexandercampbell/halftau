@@ -46,8 +46,13 @@ pub fn lex(s: String) -> Result<Vec<Token>, String> {
                 text: ch.to_string(),
                 line_number,
             }),
+            '\'' => tokens.push(Token {
+                _type: Quote,
+                text: ch.to_string(),
+                line_number,
+            }),
 
-            'a'..='z' | 'A'..='Z' => {
+            'a'..='z' | 'A'..='Z' | '+' | '-' | '*' | '/' => {
                 let mut text = ch.to_string();
                 while let Some(next) = chars.peek() {
                     if next.is_alphanumeric() || *next == '-' || *next == '\'' {

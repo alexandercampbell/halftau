@@ -19,6 +19,13 @@ fn parse_expr(tokens: &[Token], index: usize) -> Result<(Elt, usize), String> {
                 line_number, text, e
             )),
         },
+        Some(Token { _type: Quote, .. }) => {
+            let (quoted, new_index) = parse_expr(tokens, index + 1)?;
+            Ok((
+                List(vec![BuiltinFunction("quote".to_string()), quoted]),
+                new_index,
+            ))
+        }
         Some(Token {
             _type: StringLiteral,
             text,
