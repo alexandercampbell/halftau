@@ -23,8 +23,10 @@ pub struct Token {
 #[derive(Debug, PartialEq, Clone)]
 pub enum Builtin {
     Print,
+    Println,
     Def,
     Quote,
+    Fn_,
 }
 
 #[derive(Debug, PartialEq, Clone)]

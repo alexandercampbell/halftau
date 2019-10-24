@@ -10,6 +10,41 @@ fn lookup(runtime: &Runtime, name: &String) -> Result<Elt, String> {
     Err(format!("variable {:?} undefined", name))
 }
 
+fn format_with_spaces(elts: &[Elt]) -> String {
+    let mut s = String::new();
+    for i in 0..elts.len() {
+        s.push_str(&format_elt(&elts[i]));
+        if i < elts.len() - 1 {
+            s.push(' ')
+        }
+    }
+    s
+}
+
+fn format_elt(elt: &Elt) -> String {
+    match elt {
+        Elt::List(items) => {
+            let mut s = '('.to_string();
+            s.push_str(&format_with_spaces(items));
+            s.push(')');
+            s
+        }
+        Elt::Vector(items) => {
+            let mut s = '['.to_string();
+            s.push_str(&format_with_spaces(items));
+            s.push(']');
+            s
+        }
+        Elt::Int(i) => format!("{}", i),
+        Elt::Double(d) => format!("{}", d),
+        Elt::String_(s) => s.clone(),
+        Elt::Symbol(s) => s.clone(),
+        Elt::Nil => format!("nil"),
+        Elt::Function { .. } => format!("<function>"),
+        Elt::BuiltinFunction(b) => format!("<builtin function {:?}>", b),
+    }
+}
+
 fn eval_function(elts: &[Elt], runtime: &mut Runtime) -> Result<Elt, String> {
     if elts.len() == 0 {
         return Err("attempt to evaluate empty list as function".to_string());
@@ -27,7 +62,7 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime) -> Result<Elt, String> {
                 args.push(eval(&elt, runtime)?);
             }
 
-            if lexical_bindings.len() == args.len() {
+            if lexical_bindings.len() != args.len() {
                 return Err(format!(
                     "{:?} expects {} parameters-- received {}",
                     function,
@@ -67,13 +102,20 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime) -> Result<Elt, String> {
                     }
                 }
                 Builtin::Print => {
-                    let mut evaluated = vec![];
                     for arg in args {
-                        evaluated.push(eval(arg, runtime)?);
+                        let elt = eval(&arg, runtime)?;
+                        print!("{}", format_elt(&elt));
+                        print!(" ");
                     }
-                    for elt in evaluated {
-                        println!("{:?}", elt);
+                    Ok(Elt::Nil)
+                }
+                Builtin::Println => {
+                    for arg in args {
+                        let elt = eval(&arg, runtime)?;
+                        print!("{}", format_elt(&elt));
+                        print!(" ");
                     }
+                    println!();
                     Ok(Elt::Nil)
                 }
                 Builtin::Quote => {
@@ -84,6 +126,30 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime) -> Result<Elt, String> {
                         ));
                     }
                     Ok(args[0].clone())
+                }
+
+                Builtin::Fn_ => {
+                    if args.len() != 2 {
+                        return Err(format!("fn requires 2 parameters; {} found", args.len()));
+                    }
+
+                    if let Elt::Vector(ref params) = args[0] {
+                        let mut lexical_bindings = vec![];
+                        for param in params {
+                            if let Elt::Symbol(s) = param {
+                                lexical_bindings.push(s.clone());
+                            } else {
+                                return Err("only symbols allowed in fn binding vector".to_string());
+                            }
+                        }
+
+                        Ok(Elt::Function {
+                            lexical_bindings,
+                            body: Box::new(args[1].clone()),
+                        })
+                    } else {
+                        Err("fn requires a vector of symbols as its first parameter".to_string())
+                    }
                 }
             }
         }
@@ -110,9 +176,19 @@ pub fn execute(ast: Vec<Elt>) {
     root_scope
         .bindings
         .insert("print".to_string(), Elt::BuiltinFunction(Builtin::Print));
+    root_scope.bindings.insert(
+        "println".to_string(),
+        Elt::BuiltinFunction(Builtin::Println),
+    );
     root_scope
         .bindings
         .insert("def".to_string(), Elt::BuiltinFunction(Builtin::Def));
+    root_scope
+        .bindings
+        .insert("quote".to_string(), Elt::BuiltinFunction(Builtin::Quote));
+    root_scope
+        .bindings
+        .insert("fn".to_string(), Elt::BuiltinFunction(Builtin::Fn_));
 
     let mut runtime = Runtime {
         scopes: vec![root_scope],

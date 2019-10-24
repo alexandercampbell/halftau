@@ -2,28 +2,31 @@
 ; comment
 
 (def x 10)
-(print "x" x)
-(print "'x" 'x)
+(println "x\t" x)
+(println "'x\t" 'x)
 
 (def y 32)
 (def z y)
-(print "x and y " x y z)
+(println "x,y,z\t" x y z)
 
 ;(defmacro fn [arguments body]
 ;  (--construct-lambda arguments body))
 ;
+
+((fn [x] (print x)) "hello")
+
 ;(def defn
 ;  (fn [name args body]
 ;    (def name (fn args body))))
 
-; (defn sum [x y z] (+ x y z))
+;(defn sum [x y z] (print x y z))
 
-(print "hello part two\n")
-(print "hello \" part two")
-(print "hello")
-(print 1)
-(print 123)
-(print 141)
-(print 14455)
-(print 14455.54)
+;(print "hello part two\n")
+;(print "hello \" part two")
+;(print "hello")
+;(print 1)
+;(print 123)
+;(print 141)
+;(print 14455)
+;(print 14455.54)
 
