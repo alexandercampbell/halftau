@@ -27,6 +27,7 @@ pub enum Builtin {
     Def,
     Quote,
     Fn_,
+    Macro,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -42,6 +43,10 @@ pub enum Elt {
         body: Box<Elt>,
     },
     BuiltinFunction(Builtin),
+    Macro {
+        lexical_bindings: Vec<String>,
+        body: Box<Elt>,
+    },
     Nil,
 }
 
@@ -55,6 +60,7 @@ pub enum Type {
     Vector,
     Function,
     Nil,
+    Macro,
 }
 
 pub fn typeof_(v: &Elt) -> Type {
@@ -68,6 +74,7 @@ pub fn typeof_(v: &Elt) -> Type {
         Elt::Function { .. } => Type::Function,
         Elt::BuiltinFunction(_) => Type::Function,
         Elt::Nil => Type::Nil,
+        Elt::Macro { .. } => Type::Macro,
     }
 }
 

@@ -1,36 +1,12 @@
 ; vi: ft=clojure
-; comment
 
-;(def x 10)
-;(println "x\t" x)
-;(println "'x\t" 'x)
-;
+(def defn
+  (macro [name args body]
+         (def name
+           (fn args body))))
 
-(def y 32)
-(def z y)
-(println "x,y,z\t" y z)
+(defn say-hello [to-whom] (println "hello" to-whom))
+(say-hello "world")
 
-;(defmacro fn [arguments body]
-;  (--construct-lambda arguments body))
-;
-
-(def print-names
-  (fn [names] (map print names)))
-
-(defmacro defn [name args body]
-  ('def name ('fn args body)))
-
-(def my-print (fn [str] (print str)))
-(my-print "hello")
-
-;(defn 'sum [x y z] (print x y z))
-
-;(print "hello part two\n")
-;(print "hello \" part two")
-;(print "hello")
-;(print 1)
-;(print 123)
-;(print 141)
-;(print 14455)
-;(print 14455.54)
+(println '(1 2 3))
 
