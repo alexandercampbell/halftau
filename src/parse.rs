@@ -44,7 +44,7 @@ fn parse_expr(tokens: &[Token], index: usize) -> Result<(Elt, usize), String> {
         },
         Some(Token {
             _type: Ident, text, ..
-        }) => Ok((Reference(text.clone()), index + 1)),
+        }) => Ok((Symbol(text.clone()), index + 1)),
         Some(Token {
             _type: BracketR,
             line_number,

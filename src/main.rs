@@ -18,11 +18,8 @@ fn main() {
         let tokens = lex::lex(contents);
         match tokens {
             Ok(tokens) => {
-                println!("Tokens: {:?}", tokens);
                 let ast = parse::parse(&tokens[..]);
-                println!("AST: {:?}", ast);
                 runtime::execute(ast.unwrap());
-                // tokens are dropped here
             }
             Err(s) => println!("Error: {}", s),
         }

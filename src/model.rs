@@ -25,7 +25,7 @@ pub enum Elt {
     Int(i64),
     Double(f64),
     String_(String),
-    Reference(String),
+    Symbol(String),
     List(Vec<Elt>),
     Vector(Vec<Elt>),
     Function {
@@ -41,7 +41,7 @@ pub enum Type {
     Int,
     Double,
     String_,
-    Reference,
+    Symbol,
     List,
     Vector,
     Function,
@@ -53,22 +53,21 @@ pub fn typeof_(v: &Elt) -> Type {
         Elt::Int(_) => Type::Int,
         Elt::Double(_) => Type::Double,
         Elt::String_(_) => Type::String_,
-        Elt::Reference(_) => Type::Reference,
+        Elt::Symbol(_) => Type::Symbol,
         Elt::List(_) => Type::List,
         Elt::Vector(_) => Type::Vector,
         Elt::Function { .. } => Type::Function,
-        Elt::BuiltinFunction { .. } => Type::Function,
+        Elt::BuiltinFunction(_) => Type::Function,
         Elt::Nil => Type::Nil,
     }
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Scope {
-    pub parent: Option<Box<Scope>>,
     pub bindings: HashMap<String, Elt>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Runtime {
-    pub root_scope: Scope,
+    pub scopes: Vec<Scope>,
 }
