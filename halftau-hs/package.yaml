@@ -1,4 +1,4 @@
-name:                halftau-hs
+name:                halftau
 version:             0.1.0.0
 github:              "githubuser/halftau-hs"
 license:             BSD3
@@ -22,12 +22,10 @@ library:
   source-dirs: src
 
 executables:
-  halftau-hs-exe:
+  halftau:
     main:                Main.hs
-    source-dirs:         app
+    source-dirs:         src
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
-    dependencies:
-    - halftau-hs
