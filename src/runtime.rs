@@ -316,6 +316,141 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime, scope: &Scope) -> Result<E
                         Err("car only accepts lists".to_string())
                     }
                 }
+
+                Builtin::Plus => {
+                    let mut is_double = false;
+                    let mut acc_int = 0i64;
+                    let mut acc_double = 0f64;
+
+                    for arg in args {
+                        match eval(&arg, runtime, scope)? {
+                            Elt::Double(d) => {
+                                if !is_double {
+                                    acc_double = acc_int as f64;
+                                    is_double = true;
+                                }
+                                acc_double += d;
+                            }
+                            Elt::Int(i) => {
+                                if is_double {
+                                    acc_double += i as f64;
+                                } else {
+                                    acc_int += i;
+                                }
+                            }
+                            x => return Err(format!("attempt to perform addition on {:?}", x)),
+                        }
+                    }
+                    if is_double {
+                        Ok(Elt::Double(acc_double))
+                    } else {
+                        Ok(Elt::Int(acc_int))
+                    }
+                }
+
+                Builtin::Minus => {
+                    let mut first = true;
+                    let mut is_double = false;
+                    let mut acc_int = 0i64;
+                    let mut acc_double = 0f64;
+
+                    for arg in args {
+                        match eval(&arg, runtime, scope)? {
+                            Elt::Double(d) => {
+                                if first {
+                                    is_double = true;
+                                    acc_double = d;
+                                    first = false;
+                                } else {
+                                    if !is_double {
+                                        acc_double = acc_int as f64;
+                                        is_double = true;
+                                    }
+                                    acc_double -= d;
+                                }
+                            }
+                            Elt::Int(i) => {
+                                if first {
+                                    acc_int = i;
+                                    first = false;
+                                } else {
+                                    if is_double {
+                                        acc_double -= i as f64;
+                                    } else {
+                                        acc_int -= i;
+                                    }
+                                }
+                            }
+                            x => return Err(format!("attempt to perform subtraction on {:?}", x)),
+                        }
+                    }
+                    if is_double {
+                        Ok(Elt::Double(acc_double))
+                    } else {
+                        Ok(Elt::Int(acc_int))
+                    }
+                }
+
+                Builtin::Mult => {
+                    let mut is_double = false;
+                    let mut acc_int = 1i64;
+                    let mut acc_double = 1f64;
+
+                    for arg in args {
+                        match eval(&arg, runtime, scope)? {
+                            Elt::Double(d) => {
+                                if !is_double {
+                                    acc_double = acc_int as f64;
+                                    is_double = true;
+                                }
+                                acc_double *= d;
+                            }
+                            Elt::Int(i) => {
+                                if is_double {
+                                    acc_double *= i as f64;
+                                } else {
+                                    acc_int *= i;
+                                }
+                            }
+                            x => {
+                                return Err(format!("attempt to perform multiplication on {:?}", x))
+                            }
+                        }
+                    }
+                    if is_double {
+                        Ok(Elt::Double(acc_double))
+                    } else {
+                        Ok(Elt::Int(acc_int))
+                    }
+                }
+
+                Builtin::Div => {
+                    let mut first = true;
+                    let mut acc_double = 0f64;
+
+                    for arg in args {
+                        match eval(&arg, runtime, scope)? {
+                            Elt::Double(d) => {
+                                if first {
+                                    acc_double = d;
+                                    first = false;
+                                } else {
+                                    acc_double /= d;
+                                }
+                            }
+                            Elt::Int(i) => {
+                                if first {
+                                    acc_double = i as f64;
+                                    first = false;
+                                } else {
+                                    acc_double /= i as f64;
+                                }
+                            }
+                            x => return Err(format!("attempt to perform division on {:?}", x)),
+                        }
+                    }
+                    Ok(Elt::Double(acc_double))
+                }
             }
         }
 
@@ -368,6 +503,10 @@ fn bind_builtins(b: &mut HashMap<String, Elt>) {
     b.insert("empty?".to_string(), Elt::BuiltinFunction(Builtin::Empty_));
     b.insert("if".to_string(), Elt::BuiltinFunction(Builtin::If));
     b.insert("nth".to_string(), Elt::BuiltinFunction(Builtin::Nth));
+    b.insert("+".to_string(), Elt::BuiltinFunction(Builtin::Plus));
+    b.insert("-".to_string(), Elt::BuiltinFunction(Builtin::Minus));
+    b.insert("*".to_string(), Elt::BuiltinFunction(Builtin::Mult));
+    b.insert("/".to_string(), Elt::BuiltinFunction(Builtin::Div));
     b.insert("print".to_string(), Elt::BuiltinFunction(Builtin::Print));
     b.insert(
         "println".to_string(),

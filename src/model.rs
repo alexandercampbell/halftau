@@ -34,6 +34,10 @@ pub enum Builtin {
     Empty_,
     If,
     Nth,
+    Plus,
+    Minus,
+    Mult,
+    Div,
 }
 
 #[derive(Debug, PartialEq, Clone)]
