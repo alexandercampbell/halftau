@@ -224,14 +224,21 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime, scope: &Scope) -> Result<E
 
                     let condition = eval(&args[0], runtime, scope)?;
                     if truthy(&condition) {
+                        eval(&args[1], runtime, scope)
+                    } else {
                         if args.len() == 3 {
                             eval(&args[2], runtime, scope)
                         } else {
-                            Ok(Elt::Bool(false))
+                            Ok(Elt::Nil)
                         }
-                    } else {
-                        eval(&args[1], runtime, scope)
                     }
+                }
+
+                Builtin::Not => {
+                    if args.len() != 1 {
+                        return Err(format!("not requires 1 paramter, found {}", args.len()));
+                    }
+                    Ok(Elt::Bool(!truthy(&eval(&args[0], runtime, scope)?)))
                 }
 
                 Builtin::Car => {
@@ -554,6 +561,7 @@ fn bind_builtins(b: &mut HashMap<String, Elt>) {
     b.insert("cons".to_string(), Elt::BuiltinFunction(Builtin::Cons));
     b.insert("empty?".to_string(), Elt::BuiltinFunction(Builtin::Empty_));
     b.insert("if".to_string(), Elt::BuiltinFunction(Builtin::If));
+    b.insert("not".to_string(), Elt::BuiltinFunction(Builtin::Not));
     b.insert("nth".to_string(), Elt::BuiltinFunction(Builtin::Nth));
     b.insert("+".to_string(), Elt::BuiltinFunction(Builtin::Plus));
     b.insert("-".to_string(), Elt::BuiltinFunction(Builtin::Minus));

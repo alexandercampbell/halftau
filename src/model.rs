@@ -33,6 +33,7 @@ pub enum Builtin {
     Cons,
     Empty_,
     If,
+    Not,
     Nth,
     Plus,
     Minus,
