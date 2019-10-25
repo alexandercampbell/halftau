@@ -80,6 +80,14 @@ fn truthy(elt: &Elt) -> bool {
     }
 }
 
+fn to_double(elt: &Elt) -> Result<f64, String> {
+    match elt {
+        Elt::Int(i) => Ok(i.clone() as f64),
+        Elt::Double(d) => Ok(d.clone()),
+        _ => return Err(format!("expected number, got {:?}", elt)),
+    }
+}
+
 fn eval_function(elts: &[Elt], runtime: &mut Runtime, scope: &Scope) -> Result<Elt, String> {
     if elts.len() == 0 {
         return Err("attempt to evaluate empty list as function".to_string());
@@ -481,6 +489,17 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime, scope: &Scope) -> Result<E
                     Ok(Elt::Bool(true))
                 }
 
+                Builtin::GT => {
+                    if args.len() != 2 {
+                        return Err("> requires 2 parameters".to_string());
+                    }
+
+                    let first = eval(&args[0], runtime, scope)?;
+                    let second = eval(&args[1], runtime, scope)?;
+
+                    Ok(Elt::Bool(to_double(&first)? > to_double(&second)?))
+                }
+
                 Builtin::Assert => {
                     if args.len() != 1 {
                         return Err("assert requires parameters".to_string());
@@ -568,6 +587,7 @@ fn bind_builtins(b: &mut HashMap<String, Elt>) {
     b.insert("*".to_string(), Elt::BuiltinFunction(Builtin::Mult));
     b.insert("/".to_string(), Elt::BuiltinFunction(Builtin::Div));
     b.insert("=".to_string(), Elt::BuiltinFunction(Builtin::Equal));
+    b.insert(">".to_string(), Elt::BuiltinFunction(Builtin::GT));
     b.insert("assert".to_string(), Elt::BuiltinFunction(Builtin::Assert));
     b.insert(
         "assert-eq".to_string(),

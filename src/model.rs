@@ -39,6 +39,7 @@ pub enum Builtin {
     Minus,
     Mult,
     Div,
+    GT,
     Equal,
     Assert,
     AssertEq,

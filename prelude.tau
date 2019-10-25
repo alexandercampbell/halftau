@@ -7,6 +7,15 @@
 (defmacro defn [fn-name fn-args fn-body]
   (def fn-name (fn fn-args fn-body)))
 
+(defn id [x] x)
+
+; > is compiler builtin
+(defn or [a b] (if a a b))
+(defn and [a b] (if a b a))
+(defn >= [a b] (or (> a b) (= a b)))
+(defn < [a b] (not (>= a b)))
+(defn <= [a b] (not (> a b)))
+
 (defn map [f elts]
   (if (empty? elts) '()
     (cons (f (car elts)) (map f (cdr elts)))))
@@ -51,6 +60,12 @@
 (assert-eq 32 (* 8 2 2))
 (assert-eq 0.5 (/ 1 2))
 (assert-eq 1.0 (/ 1))
+(assert (> 3 2))
+(assert (not (> 2 3)))
+(assert (not (> 0 5)))
+(assert (< 2 3))
+(assert (<= 2 3))
+(assert (<= 3 3))
 
 ; test logic
 (assert-eq false (not true))
@@ -62,10 +77,17 @@
 (assert-eq 'a (if true 'a 'b))
 (assert-eq 'b (if false 'a 'b))
 (assert-eq nil (if false 'a))
+(assert (or true false))
+(assert (or false true))
+(assert (not (and false true)))
+(assert (not (and true false)))
 
 ; test stdlib
 (assert-eq 109 (foldl + 3 '(6 100)))
 (assert-eq 600 (foldl * 1 '(6 100)))
 (assert (member 1 '(1 2 3)))
 (assert (not (member 4 '(1 2 3))))
+(assert-eq '(true false true) (map not '(false true false)))
+(assert-eq '(false true false) (map id '(false true false)))
+(assert-eq '(3 4 5) (map (fn [x] (+ x 2)) '(1 2 3)))
 
