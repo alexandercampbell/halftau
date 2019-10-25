@@ -141,7 +141,7 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime, scope: &Scope) -> Result<E
                                 lexical_bindings.push(s.clone());
                             } else {
                                 return Err(
-                                    "only symbols allowed in defmacro binding vector".to_string()
+                                    "only symbols allowed in macro binding vector".to_string()
                                 );
                             }
                         }
@@ -308,39 +308,26 @@ fn eval(value: &Elt, runtime: &mut Runtime, scope: &Scope) -> Result<Elt, String
     }
 }
 
+pub fn bind_builtins(b: &mut HashMap<String, Elt>) {
+    b.insert("def".to_string(), Elt::BuiltinFunction(Builtin::Def));
+    b.insert("quote".to_string(), Elt::BuiltinFunction(Builtin::Quote));
+    b.insert("fn".to_string(), Elt::BuiltinFunction(Builtin::Fn_));
+    b.insert("macro".to_string(), Elt::BuiltinFunction(Builtin::Macro));
+    b.insert("car".to_string(), Elt::BuiltinFunction(Builtin::Car));
+    b.insert("cdr".to_string(), Elt::BuiltinFunction(Builtin::Cdr));
+    b.insert("nth".to_string(), Elt::BuiltinFunction(Builtin::Nth));
+    b.insert("print".to_string(), Elt::BuiltinFunction(Builtin::Print));
+    b.insert(
+        "println".to_string(),
+        Elt::BuiltinFunction(Builtin::Println),
+    );
+}
+
 pub fn execute(ast: Vec<Elt>) {
     let mut root_scope = Scope {
         bindings: HashMap::new(),
     };
-
-    root_scope
-        .bindings
-        .insert("print".to_string(), Elt::BuiltinFunction(Builtin::Print));
-    root_scope.bindings.insert(
-        "println".to_string(),
-        Elt::BuiltinFunction(Builtin::Println),
-    );
-    root_scope
-        .bindings
-        .insert("def".to_string(), Elt::BuiltinFunction(Builtin::Def));
-    root_scope
-        .bindings
-        .insert("quote".to_string(), Elt::BuiltinFunction(Builtin::Quote));
-    root_scope
-        .bindings
-        .insert("fn".to_string(), Elt::BuiltinFunction(Builtin::Fn_));
-    root_scope
-        .bindings
-        .insert("macro".to_string(), Elt::BuiltinFunction(Builtin::Macro));
-    root_scope
-        .bindings
-        .insert("car".to_string(), Elt::BuiltinFunction(Builtin::Car));
-    root_scope
-        .bindings
-        .insert("cdr".to_string(), Elt::BuiltinFunction(Builtin::Cdr));
-    root_scope
-        .bindings
-        .insert("nth".to_string(), Elt::BuiltinFunction(Builtin::Nth));
+    bind_builtins(&mut root_scope.bindings);
 
     let mut runtime = Runtime { root_scope };
 
