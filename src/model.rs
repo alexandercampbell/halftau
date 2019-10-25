@@ -30,6 +30,9 @@ pub enum Builtin {
     Macro,
     Car,
     Cdr,
+    Cons,
+    Empty_,
+    If,
     Nth,
 }
 
@@ -37,6 +40,7 @@ pub enum Builtin {
 pub enum Elt {
     Int(i64),
     Double(f64),
+    Bool(bool),
     String_(String),
     Symbol(String),
     List(Vec<Elt>),

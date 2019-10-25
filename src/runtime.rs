@@ -33,6 +33,7 @@ fn format_elt(elt: &Elt) -> String {
             s.push(']');
             s
         }
+        Elt::Bool(b) => format!("{}", b),
         Elt::Int(i) => format!("{}", i),
         Elt::Double(d) => format!("{}", d),
         Elt::String_(s) => s.clone(),
@@ -208,6 +209,24 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime, scope: &Scope) -> Result<E
                     }
                 }
 
+                Builtin::If => {
+                    if args.len() < 2 || args.len() > 3 {
+                        return Err(format!("if requires 2-3 parameters, found {}", args.len()));
+                    }
+
+                    let condition = eval(&args[0], runtime, scope)?;
+                    match condition {
+                        Elt::Bool(false) | Elt::Nil => {
+                            if args.len() == 3 {
+                                eval(&args[2], runtime, scope)
+                            } else {
+                                Ok(Elt::Bool(false))
+                            }
+                        }
+                        _ => eval(&args[1], runtime, scope),
+                    }
+                }
+
                 Builtin::Car => {
                     if args.len() != 1 {
                         return Err(format!(
@@ -241,6 +260,36 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime, scope: &Scope) -> Result<E
                         Ok(Elt::List(elts[1..].to_vec()))
                     } else {
                         Err("car only accepts lists".to_string())
+                    }
+                }
+
+                Builtin::Cons => {
+                    if args.len() != 2 {
+                        return Err(format!("cons take two parameters; {} found", args.len()));
+                    }
+
+                    let first = eval(&args[0], runtime, scope)?;
+                    let list = eval(&args[1], runtime, scope)?;
+                    if let Elt::List(ref elts) = list {
+                        let mut new_list = vec![first];
+                        let mut old_list = elts.clone();
+                        new_list.append(&mut old_list);
+                        Ok(Elt::List(new_list))
+                    } else {
+                        return Err(format!("second arg to cons must be a list; got {:?}", list));
+                    }
+                }
+
+                Builtin::Empty_ => {
+                    if args.len() != 1 {
+                        return Err(format!("empty? take one parameter; {} found", args.len()));
+                    }
+
+                    let list = eval(&args[0], runtime, scope)?;
+                    if let Elt::List(ref elts) = list {
+                        Ok(Elt::Bool(elts.len() == 0))
+                    } else {
+                        return Err(format!("arg to empty? must be a list; got {:?}", list));
                     }
                 }
 
@@ -303,7 +352,7 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime, scope: &Scope) -> Result<E
 fn eval(value: &Elt, runtime: &mut Runtime, scope: &Scope) -> Result<Elt, String> {
     match value {
         Elt::List(elts) => eval_function(elts, runtime, scope),
-        Elt::Symbol(name) => eval(&lookup(scope, &name)?, runtime, scope),
+        Elt::Symbol(name) => lookup(scope, &name),
         _ => Ok(value.clone()),
     }
 }
@@ -315,6 +364,9 @@ pub fn bind_builtins(b: &mut HashMap<String, Elt>) {
     b.insert("macro".to_string(), Elt::BuiltinFunction(Builtin::Macro));
     b.insert("car".to_string(), Elt::BuiltinFunction(Builtin::Car));
     b.insert("cdr".to_string(), Elt::BuiltinFunction(Builtin::Cdr));
+    b.insert("cons".to_string(), Elt::BuiltinFunction(Builtin::Cons));
+    b.insert("empty?".to_string(), Elt::BuiltinFunction(Builtin::Empty_));
+    b.insert("if".to_string(), Elt::BuiltinFunction(Builtin::If));
     b.insert("nth".to_string(), Elt::BuiltinFunction(Builtin::Nth));
     b.insert("print".to_string(), Elt::BuiltinFunction(Builtin::Print));
     b.insert(

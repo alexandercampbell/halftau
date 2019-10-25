@@ -10,7 +10,18 @@
 (defn say-hello [to-whom] (println "hello" to-whom))
 (say-hello "world")
 
-(println '(1 2 3))
-(println (car '(1 2 3)))
-(println (car (cdr '(1 2 3))))
+(defn map [f xs]
+  (if (empty? xs) '()
+    (cons (f (car xs)) (map f (cdr xs)))))
+
+(defn filter [pred xs]
+  (if (empty? xs) '()
+    (if (pred (car xs))
+      (cons (car xs) (filter pred (cdr xs)))
+      (filter pred (cdr xs)))))
+
+(def xs '(1 2 3))
+(map print xs)
+(println)
+
 
