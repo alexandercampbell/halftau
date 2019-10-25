@@ -1,14 +1,16 @@
 ; vi: ft=clojure
 
-(def defn
-  (macro [name args body]
-         (def name
-           (fn args body))))
+(def defmacro
+  (macro [macro-name macro-args macro-body]
+         (def macro-name (macro macro-args macro-body))))
+
+(defmacro defn [fn-name fn-args fn-body]
+  (def fn-name (fn fn-args fn-body)))
+
+(defn say-hello [to-whom] (println "hello" to-whom))
+(say-hello "world")
 
 (println '(1 2 3))
 (println (car '(1 2 3)))
 (println (car (cdr '(1 2 3))))
-
-(defn say-hello [to-whom] (println "hello" to-whom))
-(say-hello "world")
 
