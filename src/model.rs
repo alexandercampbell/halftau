@@ -28,6 +28,9 @@ pub enum Builtin {
     Quote,
     Fn_,
     Macro,
+    Car,
+    Cdr,
+    Nth,
 }
 
 #[derive(Debug, PartialEq, Clone)]

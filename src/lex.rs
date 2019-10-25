@@ -52,10 +52,10 @@ pub fn lex(s: String) -> Result<Vec<Token>, String> {
                 line_number,
             }),
 
-            'a'..='z' | 'A'..='Z' | '+' | '-' | '*' | '/' => {
+            'a'..='z' | 'A'..='Z' | '+' | '-' | '*' | '/' | '?' => {
                 let mut text = ch.to_string();
                 while let Some(next) = chars.peek() {
-                    if next.is_alphanumeric() || *next == '-' || *next == '\'' {
+                    if next.is_alphanumeric() || *next == '-' || *next == '\'' || *next == '?' {
                         text.push(*next);
                         chars.next();
                     } else {

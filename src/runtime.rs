@@ -207,6 +207,66 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime, scope: &Scope) -> Result<E
                         Err("fn requires a vector of symbols as its first parameter".to_string())
                     }
                 }
+
+                Builtin::Car => {
+                    if args.len() != 1 {
+                        return Err(format!(
+                            "car takes only one parameter; {} found",
+                            args.len()
+                        ));
+                    }
+
+                    let list = eval(&args[0], runtime, scope)?;
+                    if let Elt::List(ref elts) = list {
+                        if elts.len() == 0 {
+                            Err("attempt to car empty list".to_string())
+                        } else {
+                            Ok(elts[0].clone())
+                        }
+                    } else {
+                        Err("car only accepts lists".to_string())
+                    }
+                }
+
+                Builtin::Cdr => {
+                    if args.len() != 1 {
+                        return Err(format!(
+                            "cdr takes only one parameter; {} found",
+                            args.len()
+                        ));
+                    }
+
+                    let list = eval(&args[0], runtime, scope)?;
+                    if let Elt::List(ref elts) = list {
+                        Ok(Elt::List(elts[1..].to_vec()))
+                    } else {
+                        Err("car only accepts lists".to_string())
+                    }
+                }
+
+                Builtin::Nth => {
+                    if args.len() != 2 {
+                        return Err(format!("nth takes two parameters; {} found", args.len()));
+                    }
+
+                    let list = eval(&args[0], runtime, scope)?;
+                    if let Elt::List(ref elts) = list {
+                        let index = eval(&args[1], runtime, scope)?;
+                        if let Elt::Int(i) = index {
+                            match elts.get(i as usize) {
+                                Some(v) => Ok(v.clone()),
+                                _ => Err("index out of bounds".to_string()),
+                            }
+                        } else {
+                            Err(format!(
+                                "nth requires integer second param; got {:?}",
+                                index
+                            ))
+                        }
+                    } else {
+                        Err("car only accepts lists".to_string())
+                    }
+                }
             }
         }
 
@@ -272,6 +332,15 @@ pub fn execute(ast: Vec<Elt>) {
     root_scope
         .bindings
         .insert("macro".to_string(), Elt::BuiltinFunction(Builtin::Macro));
+    root_scope
+        .bindings
+        .insert("car".to_string(), Elt::BuiltinFunction(Builtin::Car));
+    root_scope
+        .bindings
+        .insert("cdr".to_string(), Elt::BuiltinFunction(Builtin::Cdr));
+    root_scope
+        .bindings
+        .insert("nth".to_string(), Elt::BuiltinFunction(Builtin::Nth));
 
     let mut runtime = Runtime { root_scope };
 
