@@ -19,7 +19,7 @@ fn format_with_spaces(elts: &[Elt]) -> String {
     s
 }
 
-fn format_elt(elt: &Elt) -> String {
+pub fn format_elt(elt: &Elt) -> String {
     match elt {
         Elt::List(items) => {
             let mut s = '('.to_string();
@@ -349,7 +349,7 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime, scope: &Scope) -> Result<E
     }
 }
 
-fn eval(value: &Elt, runtime: &mut Runtime, scope: &Scope) -> Result<Elt, String> {
+pub fn eval(value: &Elt, runtime: &mut Runtime, scope: &Scope) -> Result<Elt, String> {
     match value {
         Elt::List(elts) => eval_function(elts, runtime, scope),
         Elt::Symbol(name) => lookup(scope, &name),
@@ -357,7 +357,7 @@ fn eval(value: &Elt, runtime: &mut Runtime, scope: &Scope) -> Result<Elt, String
     }
 }
 
-pub fn bind_builtins(b: &mut HashMap<String, Elt>) {
+fn bind_builtins(b: &mut HashMap<String, Elt>) {
     b.insert("def".to_string(), Elt::BuiltinFunction(Builtin::Def));
     b.insert("quote".to_string(), Elt::BuiltinFunction(Builtin::Quote));
     b.insert("fn".to_string(), Elt::BuiltinFunction(Builtin::Fn_));
