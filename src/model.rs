@@ -39,6 +39,8 @@ pub enum Builtin {
     Mult,
     Div,
     Equal,
+    Assert,
+    AssertEq,
 }
 
 #[derive(Debug, PartialEq, Clone)]

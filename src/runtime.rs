@@ -72,6 +72,14 @@ fn replace_symbol(elt: &Elt, symbol: &str, value: Elt) -> Elt {
     }
 }
 
+fn truthy(elt: &Elt) -> bool {
+    match elt {
+        Elt::Nil => false,
+        Elt::Bool(false) => false,
+        _ => true,
+    }
+}
+
 fn eval_function(elts: &[Elt], runtime: &mut Runtime, scope: &Scope) -> Result<Elt, String> {
     if elts.len() == 0 {
         return Err("attempt to evaluate empty list as function".to_string());
@@ -215,15 +223,14 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime, scope: &Scope) -> Result<E
                     }
 
                     let condition = eval(&args[0], runtime, scope)?;
-                    match condition {
-                        Elt::Bool(false) | Elt::Nil => {
-                            if args.len() == 3 {
-                                eval(&args[2], runtime, scope)
-                            } else {
-                                Ok(Elt::Bool(false))
-                            }
+                    if truthy(&condition) {
+                        if args.len() == 3 {
+                            eval(&args[2], runtime, scope)
+                        } else {
+                            Ok(Elt::Bool(false))
                         }
-                        _ => eval(&args[1], runtime, scope),
+                    } else {
+                        eval(&args[1], runtime, scope)
                     }
                 }
 
@@ -466,6 +473,36 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime, scope: &Scope) -> Result<E
                     }
                     Ok(Elt::Bool(true))
                 }
+
+                Builtin::Assert => {
+                    if args.len() != 1 {
+                        return Err("assert requires parameters".to_string());
+                    }
+
+                    let val = eval(&args[0], runtime, scope)?;
+                    if truthy(&val) {
+                        Ok(Elt::Nil)
+                    } else {
+                        Err(format!("assertion failed: {:?}", args[0]))
+                    }
+                }
+
+                Builtin::AssertEq => {
+                    if args.len() != 2 {
+                        return Err("assert-eq requires two parameters".to_string());
+                    }
+
+                    let expected = eval(&args[0], runtime, scope)?;
+                    let actual = eval(&args[1], runtime, scope)?;
+                    if expected == actual {
+                        Ok(Elt::Nil)
+                    } else {
+                        Err(format!(
+                            "assert equals failed. expected: {:?} actual: {:?}",
+                            expected, actual
+                        ))
+                    }
+                }
             }
         }
 
@@ -523,6 +560,11 @@ fn bind_builtins(b: &mut HashMap<String, Elt>) {
     b.insert("*".to_string(), Elt::BuiltinFunction(Builtin::Mult));
     b.insert("/".to_string(), Elt::BuiltinFunction(Builtin::Div));
     b.insert("=".to_string(), Elt::BuiltinFunction(Builtin::Equal));
+    b.insert("assert".to_string(), Elt::BuiltinFunction(Builtin::Assert));
+    b.insert(
+        "assert-eq".to_string(),
+        Elt::BuiltinFunction(Builtin::AssertEq),
+    );
     b.insert("print".to_string(), Elt::BuiltinFunction(Builtin::Print));
     b.insert(
         "println".to_string(),
