@@ -375,19 +375,20 @@ pub fn bind_builtins(b: &mut HashMap<String, Elt>) {
     );
 }
 
-pub fn execute(ast: Vec<Elt>) {
-    let mut root_scope = Scope {
-        bindings: HashMap::new(),
-    };
-    bind_builtins(&mut root_scope.bindings);
-
-    let mut runtime = Runtime { root_scope };
-
+pub fn execute(runtime: &mut Runtime, ast: Vec<Elt>) {
     for node in ast {
         let scope = runtime.root_scope.clone();
-        if let Err(e) = eval(&node, &mut runtime, &scope) {
+        if let Err(e) = eval(&node, runtime, &scope) {
             println!("error during evaluation: {}", e);
             break;
         }
     }
+}
+
+pub fn new() -> Runtime {
+    let mut root_scope = Scope {
+        bindings: HashMap::new(),
+    };
+    bind_builtins(&mut root_scope.bindings);
+    Runtime { root_scope }
 }

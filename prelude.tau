@@ -7,9 +7,6 @@
 (defmacro defn [fn-name fn-args fn-body]
   (def fn-name (fn fn-args fn-body)))
 
-(defn say-hello [to-whom] (println "hello" to-whom))
-(say-hello "world")
-
 (defn map [f xs]
   (if (empty? xs) '()
     (cons (f (car xs)) (map f (cdr xs)))))
@@ -19,9 +16,4 @@
     (if (pred (car xs))
       (cons (car xs) (filter pred (cdr xs)))
       (filter pred (cdr xs)))))
-
-(def xs '(1 2 3))
-(map print xs)
-(println)
-
 
