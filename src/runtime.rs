@@ -451,6 +451,21 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime, scope: &Scope) -> Result<E
                     }
                     Ok(Elt::Double(acc_double))
                 }
+
+                Builtin::Equal => {
+                    if args.len() == 0 {
+                        return Err("equality function (=) requires parameters".to_string());
+                    }
+
+                    let first = eval(&args[0], runtime, scope)?;
+                    for arg in &args[1..] {
+                        let elt = eval(&arg, runtime, scope)?;
+                        if first != elt {
+                            return Ok(Elt::Bool(false));
+                        }
+                    }
+                    Ok(Elt::Bool(true))
+                }
             }
         }
 
@@ -507,6 +522,7 @@ fn bind_builtins(b: &mut HashMap<String, Elt>) {
     b.insert("-".to_string(), Elt::BuiltinFunction(Builtin::Minus));
     b.insert("*".to_string(), Elt::BuiltinFunction(Builtin::Mult));
     b.insert("/".to_string(), Elt::BuiltinFunction(Builtin::Div));
+    b.insert("=".to_string(), Elt::BuiltinFunction(Builtin::Equal));
     b.insert("print".to_string(), Elt::BuiltinFunction(Builtin::Print));
     b.insert(
         "println".to_string(),

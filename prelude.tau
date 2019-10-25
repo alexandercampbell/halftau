@@ -7,13 +7,22 @@
 (defmacro defn [fn-name fn-args fn-body]
   (def fn-name (fn fn-args fn-body)))
 
-(defn map [f xs]
-  (if (empty? xs) '()
-    (cons (f (car xs)) (map f (cdr xs)))))
+(defn map [f elts]
+  (if (empty? elts) '()
+    (cons (f (car elts)) (map f (cdr elts)))))
 
-(defn filter [pred xs]
-  (if (empty? xs) '()
-    (if (pred (car xs))
-      (cons (car xs) (filter pred (cdr xs)))
-      (filter pred (cdr xs)))))
+(defn filter [pred elts]
+  (if (empty? elts) '()
+    (if (pred (car elts))
+      (cons (car elts) (filter pred (cdr elts)))
+      (filter pred (cdr elts)))))
+
+(defn foldl [fn acc elts]
+  (if (empty? elts) acc
+    (foldl fn (fn acc (car elts)) (cdr elts))))
+
+(defn member [x elts]
+  (if (empty? elts) false
+    (if (= x (car elts)) true
+      (member x (cdr elts)))))
 

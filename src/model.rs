@@ -38,6 +38,7 @@ pub enum Builtin {
     Minus,
     Mult,
     Div,
+    Equal,
 }
 
 #[derive(Debug, PartialEq, Clone)]
