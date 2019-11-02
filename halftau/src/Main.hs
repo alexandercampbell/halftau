@@ -71,19 +71,45 @@ eval env elt = case elt of
                 Right (env', fn) -> evalCall env' fn rawArgs
                 l                -> pure l
 
-    ESymbol s -> pure $ Left "symbol lookup unimplemented"
-    _         -> pure $ Right (env, elt)
+    ESymbol s -> case Map.lookup s $ envRootScope env of
+        Just e  -> pure $ Right (env, e)
+        Nothing -> pure $ Left $ pack $ "undefined reference to " ++ show s
+
+    _ -> pure $ Right (env, elt)
 
 
 nextElt :: Text -> Either Text (Elt, Text)
 nextElt t = Right (ENil, "")
 
 defaultEnv :: Env
-defaultEnv = Env { envRootScope = Map.empty }
+defaultEnv = Env
+    { envRootScope = Map.fromList
+                         [ ("print"    , EBuiltin BPrint)
+                         , ("def"      , EBuiltin BDef)
+                         , ("quote"    , EBuiltin BQuote)
+                         , ("fn"       , EBuiltin BFn)
+                         , ("macro"    , EBuiltin BMacro)
+                         , ("head"     , EBuiltin BHead)
+                         , ("tail"     , EBuiltin BTail)
+                         , ("cons"     , EBuiltin BCons)
+                         , ("no"       , EBuiltin BNo)
+                         , ("if"       , EBuiltin BIf)
+                         , ("not"      , EBuiltin BNot)
+                         , ("nth"      , EBuiltin BNth)
+                         , ("plus"     , EBuiltin BPlus)
+                         , ("minus"    , EBuiltin BMinus)
+                         , ("mult"     , EBuiltin BMult)
+                         , ("div"      , EBuiltin BDiv)
+                         , (">"        , EBuiltin BGT)
+                         , ("="        , EBuiltin BEqual)
+                         , ("assert"   , EBuiltin BAssert)
+                         , ("assert-eq", EBuiltin BAssertEq)
+                         ]
+    }
 
 main :: IO ()
 main = do
-    v <- eval defaultEnv (EList [EBuiltin BPrint, ENil])
+    v <- eval defaultEnv (EList [ESymbol "print", ENil])
     case v of
         Right (env', v') -> pure ()
         Left  e          -> putStrLn $ "executing error: " ++ show e
