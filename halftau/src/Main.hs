@@ -2,10 +2,10 @@
 module Main where
 
 import           Data.Array
-import qualified Data.Map.Strict               as Map
 import           Data.Text
 import           GHC.Float
 import           GHC.Int
+import qualified Data.Map.Strict               as Map
 
 data Elt
     = EInt(Int64)
@@ -54,7 +54,7 @@ type EvalResult = Either Text (Binds, Elt)
 evalBuiltin :: Env -> Builtin -> [Elt] -> IO EvalResult
 evalBuiltin env builtin args = case builtin of
     BPrint -> do
-        putStrLn $ show args
+        traverse (\a -> putStr $ show a ++ " ") args
         pure $ Right $ (envRoot env, ENil)
     b -> pure $ Left $ pack $ "builtin " ++ (show b) ++ " unimplemented"
 
@@ -117,7 +117,7 @@ envLookup key env = case Map.lookup key $ envLocal env of
 
 main :: IO ()
 main = do
-    v <- eval defaultEnv (EList [ESymbol "print", ENil])
+    v <- eval defaultEnv (EList [ESymbol "print", ENil, ENil])
     case v of
         Right (binds, v') -> pure ()
         Left  e           -> putStrLn $ "executing error: " ++ show e
