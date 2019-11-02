@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Main where
+module Halftau where
 
 import           Data.Array
 import           Data.Text
@@ -114,10 +114,3 @@ envLookup :: Text -> Env -> Maybe Elt
 envLookup key env = case Map.lookup key $ envLocal env of
     Nothing -> Map.lookup key $ envRoot env
     v       -> v
-
-main :: IO ()
-main = do
-    v <- eval defaultEnv (EList [ESymbol "print", ENil, ENil])
-    case v of
-        Right (binds, v') -> pure ()
-        Left  e           -> putStrLn $ "executing error: " ++ show e

@@ -11,16 +11,32 @@ description:         Please see the README on GitHub at <https://github.com/alex
 dependencies:
 - base >= 4.7 && < 5
 
+library:
+  source-dirs: src
+  dependencies:
+  - text
+  - array
+  - containers
+
 executables:
   halftau-exe:
     main:                Main.hs
-    source-dirs:         src
+    source-dirs:         app
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - text
-    - array
-    - containers
+    - halftau
+
+tests:
+  halftau-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - halftau
 
