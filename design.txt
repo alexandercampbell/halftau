@@ -1,0 +1,58 @@
+
+# halftau design
+
+elts
+	null		null
+	integer		64 bit integer
+	double		64 bit float
+	string		(immutable) UTF-8 string
+	char		UTF-8 character
+	byte		8-bit byte
+	list		pair of head, tail			[seq]
+	vector		(immutable) array of fixed size		[seq]
+	hashmap		(immutable) mapping of key -> value
+	set		(immutable) deduplicated set of keys
+	keyword		things like :a, :b, :c
+	symbol		things like 'a, 'b, 'c
+
+syntax notes
+	null		null
+	1		integer
+	1.		double
+	1e5		double
+	'(1 2)		list
+	[1 2]		vector
+	{:a 1}		map
+	#{:a}		set
+	"string"	string
+	'c'		char
+	#(+ 1 %)	lambda
+	[x & ys]	expands to [x y1 y2 y3]
+	; text		comment
+
+interpreter builtin functions (core)
+	head		return first elt of seq
+	tail		return all elts after head of seq
+	cons		return head attached to list tail
+	nth		return nth elt of seq or nth char of string
+	null?		true iff value is non null
+	truthy?		true iff value is neither null nor false
+	=		true iff values are recursively identical
+	map		apply fn to each elt of seq
+	parallel-map	apply fn to each elt of seq in numCPU threads
+	filter		filter seq by fn (always returns list)
+	parallel-filter	filter seq by fn in numCPU threads (always returns list)
+	->		thread-first macro
+	->>		thread-last macro
+	str		converts elts to string representation and concats
+	char		return unicode char
+	count		return size of seq or string (strings: chars, not bytes)
+
+interpreter builtin functions (extended)
+	io/slurp	returns contents of file in filename
+	io/spit		write string to file
+	io/append	append string to file
+	str/cat		concatenate all strings together
+	str/substr
+	str/contains
+
