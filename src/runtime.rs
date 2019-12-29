@@ -335,7 +335,10 @@ fn eval_function(elts: &[Elt], runtime: &mut Runtime, scope: &Scope) -> Result<E
                             ))
                         }
                     } else {
-                        Err("car only accepts lists".to_string())
+                        Err(format!(
+                            "nth requires a list as its first parameter; {:?} found",
+                            list
+                        ))
                     }
                 }
 
