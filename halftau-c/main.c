@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum elt_type {
+enum elt_type
+{
 	ELT_TYPE_INT,
 	ELT_TYPE_DOUBLE,
 	ELT_TYPE_BOOL,
@@ -19,7 +20,8 @@ enum elt_type {
 };
 
 // Could use a union type to reduce the memory footprint of elt.
-struct elt {
+struct elt
+{
 	enum elt_type type;
 
 	// Used for ints and bools.
@@ -37,7 +39,8 @@ struct elt {
 	struct elt *head, *tail;
 };
 
-struct elt *new_elt() {
+struct elt *new_elt()
+{
 	// FIXME: this leaks memory.
 	// In the prototyping stage, this is acceptable.
 	struct elt *e = malloc(sizeof(struct elt));
@@ -46,16 +49,20 @@ struct elt *new_elt() {
 	return e;
 }
 
-bool truthy(struct elt *e) {
+bool truthy(struct elt *e)
+{
 	assert(e);
-	if (e->type == ELT_TYPE_NIL) return false;
-	if (e->type == ELT_TYPE_BOOL) return e->prim_value_int == 0;
+	if (e->type == ELT_TYPE_NIL)
+		return false;
+	if (e->type == ELT_TYPE_BOOL)
+		return e->prim_value_int == 0;
 	return true;
 }
 
 struct elt *eval(struct elt *e);
 
-struct elt *eval_function(struct elt *fn, struct elt *args_raw) {
+struct elt *eval_function(struct elt *fn, struct elt *args_raw)
+{
 	assert(fn->type == ELT_TYPE_FUNCTION);
 	assert(args_raw->type == ELT_TYPE_LIST);
 
@@ -64,7 +71,8 @@ struct elt *eval_function(struct elt *fn, struct elt *args_raw) {
 	args->head = args->tail = NULL;
 
 	struct elt *p = args;
-	while (args_raw->type != ELT_TYPE_NIL) {
+	while (args_raw->type != ELT_TYPE_NIL)
+	{
 		p->head = eval(args_raw->head);
 
 		p->tail = new_elt();
@@ -72,15 +80,16 @@ struct elt *eval_function(struct elt *fn, struct elt *args_raw) {
 		p = p->tail;
 
 		args_raw = args_raw->tail;
-		assert(args_raw->type == ELT_TYPE_LIST
-			|| args_raw->type == ELT_TYPE_NIL);
+		assert(args_raw->type == ELT_TYPE_LIST || args_raw->type == ELT_TYPE_NIL);
 	}
 }
 
-struct elt *eval(struct elt *e) {
+struct elt *eval(struct elt *e)
+{
 	assert(e);
 
-	switch (e->type) {
+	switch (e->type)
+	{
 	case ELT_TYPE_INT:
 	case ELT_TYPE_DOUBLE:
 	case ELT_TYPE_BOOL:
@@ -88,11 +97,14 @@ struct elt *eval(struct elt *e) {
 	case ELT_TYPE_NIL:
 		return e;
 
-	case ELT_TYPE_LIST: {
+	case ELT_TYPE_LIST:
+	{
 		struct elt *function = eval(e->head);
 
-		switch (function->type) {
-		case ELT_TYPE_FUNCTION: {
+		switch (function->type)
+		{
+		case ELT_TYPE_FUNCTION:
+		{
 			return eval_function(function, e->tail);
 		}
 		default:
@@ -100,12 +112,12 @@ struct elt *eval(struct elt *e) {
 		}
 	}
 
-	default: return NULL;
+	default:
+		return NULL;
 	}
-
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 	return 0;
 }
-
